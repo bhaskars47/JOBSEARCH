@@ -14,7 +14,7 @@ This repository has evolved from an initialization placeholder into a fully func
 
 ## 📂 Key Components
 
-- `config/user_profile.yaml`: Your master configuration file containing targeted titles, skills, minimum salary, and blocked companies.
+- `config/user_profile.yaml.example`: Template for your master configuration file containing targeted titles, skills, minimum salary, etc.
 - `run_dashboard.sh`: Shell script to quickly boot up the local Flask tracking dashboard.
 - `pyproject.toml`: Manages dependencies such as Playwright, Groq, SQLAlchemy, and Flask.
 - `src/`: Core Python modules housing the automation logic and DB models.
@@ -25,7 +25,11 @@ This repository has evolved from an initialization placeholder into a fully func
    Ensure Python 3.14+ is installed. Use your preferred package manager (like `uv` or `pip`) to install dependencies outlined in `pyproject.toml`.
 
 2. **Configure Your Profile:**
-   Edit `config/user_profile.yaml` to match your background and job search targets (e.g. Senior QA Engineer, API testing, etc.).
+   Copy the example configuration to set up your personal profile:
+   ```bash
+   cp config/user_profile.yaml.example config/user_profile.yaml
+   ```
+   Then edit `config/user_profile.yaml` to match your background and job search targets (e.g. Senior QA Engineer, API testing, etc.).
 
 3. **Run the Dashboard:**
    Execute the dashboard locally to monitor your application progress:

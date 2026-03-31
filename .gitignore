@@ -17,3 +17,6 @@ data/jobs.db
 data/cover_letters/
 data/browser_profile/
 data/pipeline.log
+
+# Personal configurations
+config/user_profile.yaml
