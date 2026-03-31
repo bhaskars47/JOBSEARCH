@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────
+#  User Profile — Job Search Automation
+#  Edit this file to match YOUR background.
+# ─────────────────────────────────────────────
+
+# Full name and contact info (used in auto-apply pre-fill)
+name: "Bhaskar Srivastava"
+email: "bhaskar47@gmail.com"          # e.g. bhaskar@example.com
+phone: "+91-7977654464"          # e.g. +91-XXXXXXXXXX
+
+# Path to your resume file (used for upload in semi-auto apply)
+resume_path: "~/Documents/Resume.pdf"
+
+# Job titles you're targeting
+target_titles:
+  - Senior QA Engineer
+  - QA Lead
+  - QA Manager
+  - SDET
+  - Staff QA Engineer
+  - AI QA Engineer
+  - Quality Assurance Lead
+  - Test Automation Lead
+
+# Your core skills (used by Claude for match scoring)
+skills:
+  - Test automation
+  - Selenium
+  - Playwright
+  - Cypress
+  - API testing
+  - Postman
+  - CI/CD
+  - Jenkins
+  - GitHub Actions
+  - Python
+  - Java
+  - AI-assisted testing
+  - Performance testing
+  - Agile / Scrum
+  - JIRA
+  - BDD / Cucumber
+
+# Years of total QA experience
+years_experience: 12   # ← adjust
+
+# Preferred work locations (include "Remote" if open to it)
+target_locations:
+  - Remote
+  - India
+  - Bangalore
+  - Mumbai
+  - Hyderabad
+  - New Delhi
+  - NCR
+
+# Minimum annual salary (in local currency; 0 = no filter)
+salary_min: 0
+
+# Companies to exclude from results
+excluded_companies: []
+
+# Industries to exclude
+excluded_industries:
+  - gambling
+  - tobacco
+  - adult content

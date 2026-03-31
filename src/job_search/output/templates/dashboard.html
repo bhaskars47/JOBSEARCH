@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobSearch Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; }
+
+    /* Header */
+    .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid #2d3748; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .header-left h1 { font-size: 20px; font-weight: 700; color: #fff; }
+    .header-left p { font-size: 13px; color: #94a3b8; margin-top: 3px; }
+    .stats { display: flex; gap: 20px; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 700; color: #e94560; }
+    .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* Run pipeline button */
+    .run-btn { background: #e94560; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s; }
+    .run-btn:hover { background: #c73652; }
+    .run-btn:disabled { background: #4a5568; cursor: not-allowed; }
+    .run-btn .spinner { width: 14px; height: 14px; border: 2px solid #fff4; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+    .run-btn.loading .spinner { display: block; }
+    .status-msg { font-size: 12px; color: #94a3b8; margin-top: 5px; text-align: right; }
+
+    /* Filters */
+    .filters { padding: 14px 28px; background: #13131a; border-bottom: 1px solid #1e2535; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .filters label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+    .filters select, .filters input[type=range] { background: #1e2535; border: 1px solid #2d3748; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+    .filter-group { display: flex; align-items: center; gap-8px; gap: 8px; }
+    .score-val { font-size: 13px; font-weight: 700; color: #e94560; min-width: 28px; }
+
+    /* Table container */
+    .table-wrap { padding: 20px 28px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #64748b; border-bottom: 1px solid #1e2535; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid #1a1f2e; transition: background .15s; }
+    tbody tr:hover { background: #151a27; }
+    tbody td { padding: 12px 12px; vertical-align: middle; }
+
+    /* Score badge */
+    .badge { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; min-width: 44px; }
+    .badge-high { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+    .badge-mid  { background: #1c1700; color: #facc15; border: 1px solid #713f12; }
+    .badge-low  { background: #1a0a0a; color: #f87171; border: 1px solid #7f1d1d; }
+    .badge-none { background: #1e2535; color: #475569; border: 1px solid #2d3748; }
+
+    /* Rec badge */
+    .rec { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .rec-apply   { background: #052e16; color: #4ade80; }
+    .rec-stretch { background: #1c1700; color: #facc15; }
+    .rec-skip    { background: #1a0a0a; color: #f87171; }
+
+    /* Source tag */
+    .source-tag { font-size: 11px; padding: 2px 7px; border-radius: 8px; background: #1e2535; color: #94a3b8; }
+
+    /* Title + company */
+    .job-title { font-weight: 600; color: #f1f5f9; max-width: 280px; }
+    .job-title a { color: inherit; text-decoration: none; }
+    .job-title a:hover { color: #60a5fa; }
+    .job-company { font-size: 12px; color: #64748b; margin-top: 3px; }
+    .job-location { font-size: 12px; color: #94a3b8; }
+    .remote-pill { font-size: 10px; background: #1e3a5f; color: #60a5fa; padding: 2px 6px; border-radius: 8px; margin-left: 4px; }
+
+    /* Rationale tooltip area */
+    .rationale { font-size: 12px; color: #64748b; max-width: 280px; line-height: 1.4; }
+
+    /* Apply button */
+    .apply-btn { background: #e94560; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; white-space: nowrap; }
+    .apply-btn:hover { background: #c73652; transform: scale(1.03); }
+    .apply-btn.applied { background: #166534; color: #4ade80; cursor: default; }
+    .apply-btn.applied:hover { background: #166534; transform: none; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; color: #475569; }
+    .empty h2 { font-size: 18px; margin-bottom: 8px; }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Notification */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1e3a5f; color: #93c5fd; border: 1px solid #2563eb; padding: 12px 18px; border-radius: 8px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; z-index: 100; }
+    .toast.show { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>JobSearch Dashboard</h1>
+    <p>QA roles matched to your profile</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">{{ total }}</div><div class="stat-label">Total Jobs</div></div>
+    <div class="stat"><div class="stat-num">{{ scored }}</div><div class="stat-label">Scored</div></div>
+    <div class="stat"><div class="stat-num">{{ jobs|length }}</div><div class="stat-label">Showing</div></div>
+  </div>
+  <div>
+    <button class="run-btn" id="runBtn" onclick="runPipeline()">
+      <div class="spinner" id="spinner"></div>
+      ↻ Run Pipeline
+    </button>
+    <div class="status-msg" id="statusMsg">
+      {% if pipeline_status.last_run %}Last run: {{ pipeline_status.last_run }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<form method="GET" action="/" class="filters">
+  <div class="filter-group">
+    <label>Min Score</label>
+    <input type="range" name="min_score" min="0" max="90" step="10" value="{{ min_score }}"
+      oninput="this.nextElementSibling.textContent = this.value">
+    <span class="score-val">{{ min_score }}</span>
+  </div>
+  <div class="filter-group">
+    <label>Source</label>
+    <select name="source" onchange="this.form.submit()">
+      <option value="all" {% if source_filter == 'all' %}selected{% endif %}>All Sources</option>
+      {% for s in sources %}
+      <option value="{{ s }}" {% if source_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Recommendation</label>
+    <select name="rec" onchange="this.form.submit()">
+      <option value="all" {% if rec_filter == 'all' %}selected{% endif %}>All</option>
+      <option value="apply" {% if rec_filter == 'apply' %}selected{% endif %}>Apply</option>
+      <option value="stretch" {% if rec_filter == 'stretch' %}selected{% endif %}>Stretch</option>
+      <option value="skip" {% if rec_filter == 'skip' %}selected{% endif %}>Skip</option>
+    </select>
+  </div>
+  <button type="submit" style="background:#1e2535;border:1px solid #2d3748;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">Apply Filters</button>
+</form>
+
+<div class="table-wrap">
+  {% if jobs %}
+  <table>
+    <thead>
+      <tr>
+        <th>Score</th>
+        <th>Job Title</th>
+        <th>Location</th>
+        <th>Source</th>
+        <th>Rec.</th>
+        <th>Rationale</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr id="row-{{ job.job_id }}">
+        <td>
+          {% if job.match_score is not none %}
+            <span class="badge {% if job.match_score >= 70 %}badge-high{% elif job.match_score >= 50 %}badge-mid{% else %}badge-low{% endif %}">
+              {{ job.match_score }}
+            </span>
+          {% else %}
+            <span class="badge badge-none">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="job-title"><a href="{{ job.url }}" target="_blank">{{ job.title }}</a></div>
+          <div class="job-company">{{ job.company }}</div>
+        </td>
+        <td>
+          <span class="job-location">{{ job.location }}</span>
+          {% if job.remote %}<span class="remote-pill">Remote</span>{% endif %}
+        </td>
+        <td><span class="source-tag">{{ job.source }}</span></td>
+        <td>
+          {% if job.recommendation %}
+            <span class="rec rec-{{ job.recommendation }}">{{ job.recommendation }}</span>
+          {% else %}—{% endif %}
+        </td>
+        <td><div class="rationale">{{ job.match_rationale or '—' }}</div></td>
+        <td>
+          {% if job.job_id in applied_ids %}
+            <button class="apply-btn applied" disabled>✓ Applied</button>
+          {% else %}
+            <button class="apply-btn" onclick="applyJob('{{ job.job_id }}', this)">Apply →</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <h2>No jobs found</h2>
+    <p>Try lowering the score filter or running the pipeline to fetch fresh jobs.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg, color) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color === 'green' ? '#052e16' : '#1e3a5f';
+    t.style.color = color === 'green' ? '#4ade80' : '#93c5fd';
+    t.style.borderColor = color === 'green' ? '#166534' : '#2563eb';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function applyJob(jobId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Opening...';
+    fetch('/apply/' + jobId, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        btn.textContent = '✓ Applied';
+        btn.classList.add('applied');
+        showToast('Opened job in browser — good luck! 🚀', 'green');
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.textContent = 'Apply →';
+        showToast('Failed to open job', 'blue');
+      });
+  }
+
+  function runPipeline() {
+    const btn = document.getElementById('runBtn');
+    const msg = document.getElementById('statusMsg');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    msg.textContent = 'Fetching jobs...';
+
+    fetch('/pipeline/run', { method: 'POST' })
+      .then(r => r.json())
+      .then(() => {
+        pollStatus();
+      });
+  }
+
+  function pollStatus() {
+    const interval = setInterval(() => {
+      fetch('/pipeline/status')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('statusMsg').textContent = data.message || 'Running...';
+          if (!data.running) {
+            clearInterval(interval);
+            document.getElementById('runBtn').classList.remove('loading');
+            document.getElementById('runBtn').disabled = false;
+            showToast('Pipeline complete — refreshing results...', 'green');
+            setTimeout(() => location.reload(), 1500);
+          }
+        });
+    }, 2000);
+  }
+</script>
+</body>
+</html>

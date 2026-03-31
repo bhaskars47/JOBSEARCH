@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jobsearch-dashboard",
+      "runtimeExecutable": "/Users/bhaskar.srivastava/.gemini/antigravity/scratch/bhaskars47/JOBSEARCH/.venv/bin/python",
+      "runtimeArgs": ["-m", "src.job_search.output.dashboard"],
+      "port": 5100
+    }
+  ]
+}
