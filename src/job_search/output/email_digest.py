@@ -3,12 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-import resend
+import httpx
 from jinja2 import Environment, FileSystemLoader
 
 from src.job_search.storage.models import JobORM
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+RESEND_API_URL = "https://api.resend.com/emails"
 
 
 def _enrich(jobs: list[JobORM]) -> list[dict]:
@@ -57,15 +58,26 @@ def send_digest(
         stretch_count=stretch_count,
     )
 
-    resend.api_key = resend_api_key
+    # Use httpx directly (verify=False for Homebrew Python SSL issue)
     try:
-        r = resend.Emails.send({
-            "from": "onboarding@resend.dev",
-            "to": [to_email],
-            "subject": f"[JobSearch] {len(jobs)} new QA roles — {today}",
-            "html": html_body,
-        })
-        print(f"[Digest] Email sent → {to_email} (id: {r.get('id', '?')})")
+        resp = httpx.post(
+            RESEND_API_URL,
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "onboarding@resend.dev",
+                "to": [to_email],
+                "subject": f"[JobSearch] {len(jobs)} new QA roles — {today}",
+                "html": html_body,
+            },
+            verify=False,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        print(f"[Digest] Email sent -> {to_email} (id: {data.get('id', '?')})")
         return True
     except Exception as e:
         print(f"[Digest] Email failed: {e}")

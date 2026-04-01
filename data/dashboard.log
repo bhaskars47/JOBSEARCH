@@ -1,0 +1,15 @@
+ * Serving Flask app 'dashboard'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5100
+ * Running on http://192.168.29.93:5100
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [01/Apr/2026 01:18:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Apr/2026 01:18:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Apr/2026 01:18:57] "POST /apply/70916fb1a5df7dd7 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Apr/2026 01:26:15] "POST /pipeline/run HTTP/1.1" 200 -
+/Users/bhaskar.srivastava/.gemini/antigravity/scratch/bhaskars47/JOBSEARCH/src/job_search/output/dashboard.py:115: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  _pipeline_status["last_run"] = datetime.utcnow().strftime("%H:%M UTC")
+127.0.0.1 - - [01/Apr/2026 01:26:17] "GET /pipeline/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Apr/2026 01:26:18] "GET / HTTP/1.1" 200 -
